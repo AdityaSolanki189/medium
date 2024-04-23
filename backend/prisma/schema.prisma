@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  password  String
+  blogs     Blog[]
+}
+
+model Blog {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  pubilshed Boolean  @default(false)
+  author    User     @relation(fields: [authorId], references: [id])
+  authorId  String
+}
+
+// here the relation between the user and the post help create a constraint such that a post cannot be created with an unvalid author id, an user must exist with that author id else the db will throw an error.
