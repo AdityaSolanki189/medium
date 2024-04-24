@@ -1,3 +1,4 @@
+import { signinInputSchema, signupInputSchema } from "@adi_solanki21/medium-common-module";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
@@ -13,17 +14,21 @@ export const userRouter = new Hono<{
 
 userRouter.post("/signup", async (c) => {
   const body = await c.req.json();
-
+  const {success} = signupInputSchema.safeParse(body);
+  if(!success) {
+    c.status(403);
+    return c.text("Invalid input!");
+  }
   // use prisma client with accelerate extension - should be via middleware
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
   }).$extends(withAccelerate());
-  console.log("hi");
   
   // create a new user
   try {
     const user = await prisma.user.create({
       data: {
+        name: body.name,
         email: body.email,
         password: body.password,
       },
@@ -46,7 +51,11 @@ userRouter.post("/signup", async (c) => {
 
 userRouter.post("/signin", async (c) => {
     const body = await c.req.json()
-
+    const {success} = signinInputSchema.safeParse(body)
+    if(!success) {
+      c.status(403)
+      return c.text('Invalid input!')
+    }
     // use prisma client with accelerate extension - should be via middleware
     const prisma = new PrismaClient({
       datasourceUrl: c.env.DATABASE_URL,

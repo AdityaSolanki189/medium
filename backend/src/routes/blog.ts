@@ -1,3 +1,4 @@
+import { createBlogInputSchema, updateBlogInputSchema } from "@adi_solanki21/medium-common-module";
 import { PrismaClient } from "@prisma/client/edge";
 import { withAccelerate } from "@prisma/extension-accelerate";
 import { Hono } from "hono";
@@ -36,6 +37,11 @@ blogRouter.use('/*', async (c, next) => {
 // create a new blog
 blogRouter.post('/', async (c) => {
     const body = await c.req.json();
+    const {success} = createBlogInputSchema.safeParse(body);
+    if (!success) {
+        c.status(411);
+        return c.text('Invalid input!');
+    }
     const userId = c.get('userId');
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
@@ -63,6 +69,11 @@ blogRouter.post('/', async (c) => {
 // update a blog
 blogRouter.put('/', async (c) => {
     const body = await c.req.json();
+    const {success} = updateBlogInputSchema.safeParse(body);
+    if (!success) {
+        c.status(411);
+        return c.text('Invalid input!');
+    }
     const prisma = new PrismaClient({
         datasourceUrl: c.env.DATABASE_URL,
     }).$extends(withAccelerate());
@@ -129,4 +140,3 @@ blogRouter.get('/:id', async (c) => {
         return c.text('Failed to get blog!');
     }
 })
-
