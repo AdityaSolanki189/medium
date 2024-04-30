@@ -1,7 +1,8 @@
-export interface IBlogs {
+import { IAuthor } from "./UserViews";
+
+export interface IBlog {
     id: string;
-    authorId: string;
+    author: IAuthor;
     title: string;
     content: string;
-    published: string;
 }
